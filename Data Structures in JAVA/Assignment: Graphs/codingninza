@@ -1,66 +1,62 @@
-
 import java.util.*;
 
 public class Solution {
-	
-	int solve(String[] Graph , int N, int M)
-	{
+    // Define the possible directions to move in the grid
+    private int[] dx = {-1, -1, -1, 0, 0, 1, 1, 1};
+    private int[] dy = {-1, 0, 1, -1, 1, -1, 0, 1};
+    // Define the target string to search for
+    private String target = "CODINGNINJA";
 
-        
-        String searchingString = "CODINGNINJA";
-		boolean[][] visited = new boolean[N][M];
+    // Method to check if a cell is safe to visit
+    private boolean isSafe(int x, int y, int N, int M, boolean[][] visited) {
+        // A cell is safe if it is within the grid boundaries and has not been visited yet
+        return (x >= 0 && x < N && y >= 0 && y < M && !visited[x][y]);
+    }
 
-		for(int i=0;i<Graph.length;i++) {
+    // Recursive method to perform the depth-first search
+    private boolean search(String[] Graph, int x, int y, int N, int M, boolean[][] visited, int index) {
+        // Mark the current cell as visited
+        visited[x][y] = true;
 
-			for(int j=0;j<Graph[i].length();j++) {
-				if(Graph[i].charAt(j) == 'C' ) {
-					
-					boolean ans =  dfs( Graph,visited,searchingString.substring(1),i,j);
-					if(ans) {
-						return 1;
-					}
-                   
+        // If we have found the entire target string, return true
+        if (index == target.length() - 1) {
+            return true;
+        }
 
-				}
-			}
+        // Try all possible directions
+        for (int dir = 0; dir < 8; dir++) {
+            int newX = x + dx[dir], newY = y + dy[dir];
 
-		}
-		return 0;
-	}
-    public static boolean dfs(String[] graph, boolean[][] visited, String searchString,int i,int j) {
+            // If the next cell is safe and contains the next character in the target string, visit it
+            if (isSafe(newX, newY, N, M, visited) && Graph[newX].charAt(newY) == target.charAt(index + 1)) {
+                // If we can find the target string from here, return true
+                if (search(Graph, newX, newY, N, M, visited, index + 1)) {
+                    return true;
+                }
+            }
+        }
 
-		if(searchString.length() == 0) {
-			//visited[i][j] = true;
-			return true;
-		}
+        // If we couldn't find the target string from here, backtrack by marking the cell as unvisited
+        visited[x][y] = false;
+        return false;
+    }
 
-		visited[i][j] = true;
-		// To traverse in 8 different directions
-		int[] X_Dir = {-1,1,0,0,1,-1,1,-1 };
-		int[] Y_Dir = {0,0,-1,1,1,-1,-1,1 };
+    // Main method to start the search
+    public int solve(String[] Graph, int N, int M) {
+        // Initialize the visited array
+        boolean[][] visited = new boolean[N][M];
 
-		for(int k=0;k<X_Dir.length;k++) {
+        // Start the search from every cell that contains the first character of the target string
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                if (Graph[i].charAt(j) == target.charAt(0) && search(Graph, i, j, N, M, visited, 0)) {
+                    // If we can find the target string from here, return 1
+                    return 1;
+                }
+            }
+        }
 
-			int x = i+ X_Dir[k];
-			int y = j+ Y_Dir[k];
-
-			if( x>=0 && y>=0 && x< graph.length &&
-					y < graph[x].length() && 
-					graph[x].charAt(y) ==searchString.charAt(0) && !visited[x][y]  ) {
-
-				boolean smallAns = dfs(graph, visited, searchString.substring(1), x, y);
-				if(smallAns) {
-					return smallAns;
-				}
-				
-			}
-
-
-		}
-		
-		visited[i][j] = false;
-		return false;
-	}
-	
-	
+        // If we couldn't find the target string anywhere in the grid, return 0
+        return 0;
+    }
 }
